@@ -310,6 +310,13 @@
             gap: 8px;
             font-size: 0.85rem;
             color: var(--text-secondary);
+            cursor: help;
+            border-bottom: 1px dotted var(--text-muted);
+            padding-bottom: 1px;
+        }
+
+        .workers-label {
+            user-select: none;
         }
 
         .workers-input {
@@ -978,8 +985,9 @@
             </button>
             <button class="btn btn-secondary" id="loadBtn_${tab}" onclick="loadResults('${tab}')">Load Previous</button>
             <button class="btn btn-secondary" id="clearBtn_${tab}" onclick="clearResults('${tab}')">Clear Results</button>
-            <div class="workers-group">
-                <span>Workers</span>
+            <div class="workers-group" title="Workers are parallel browser windows that search multiple games at once.&#10;&#10;• More workers = Much faster scraping&#10;• Fewer workers = Less CPU and RAM usage&#10;&#10;Recommended: 2-4 for most computers.">
+                <span class="workers-label">Workers</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 <input type="number" class="workers-input" id="workers_${tab}" value="3" min="1">
             </div>
         </div>
