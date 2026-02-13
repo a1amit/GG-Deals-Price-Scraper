@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project runtime files
+results.json
+*_results.json
+*_progress.json
+progress.json
+NUL
+
+# User data
+games.txt
+
+# OS
+Thumbs.db
+.DS_Store

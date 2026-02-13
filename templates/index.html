@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GG.Deals Price Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-hover: #1e2d50;
+            --accent: #6c63ff;
+            --accent-glow: rgba(108, 99, 255, 0.3);
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888aa;
+            --text-muted: #555577;
+            --green: #00d68f;
+            --green-dim: rgba(0, 214, 143, 0.15);
+            --red: #ff6b6b;
+            --yellow: #ffd93d;
+            --border: #2a2a4a;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 32px 0 24px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6c63ff, #00d68f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Tabs */
+        .tabs-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-secondary);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-btn .tab-badge {
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            color: var(--text-muted);
+        }
+
+        .tab-btn.active .tab-badge {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .tab-btn .tab-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        .tab-btn .tab-status.active {
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Compare bar */
+        .compare-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .btn-compare-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: #0f0f1a;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-compare-view:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-compare-view:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Compare side-by-side */
+        .compare-view {
+            display: none;
+        }
+
+        .compare-view.active {
+            display: block;
+        }
+
+        .compare-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .compare-column h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .compare-column h3.trader-title {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .compare-column h3.my-title {
+            color: var(--green);
+            border-bottom-color: var(--green);
+        }
+
+        @media (max-width: 900px) {
+            .compare-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 28px var(--accent-glow);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.85;
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .btn-green {
+            background: var(--green);
+            color: #0f0f1a;
+            font-weight: 700;
+        }
+
+        .btn-green:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-green:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Controls & inputs */
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .workers-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .workers-input {
+            width: 52px;
+            padding: 6px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .workers-input:focus {
+            border-color: var(--accent);
+        }
+
+        /* Games input */
+        .games-input-section {
+            margin-bottom: 24px;
+        }
+
+        .games-input-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .games-input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .games-input-header h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .games-input-header .game-count {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .games-textarea {
+            width: 100%;
+            min-height: 140px;
+            max-height: 300px;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .games-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .games-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .games-input-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        /* Progress */
+        .progress-section {
+            display: none;
+            margin-bottom: 24px;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-stats {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar-outer {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 8px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-game {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .progress-game span {
+            color: var(--text-secondary);
+        }
+
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.accent {
+            color: var(--accent);
+        }
+
+        .stat-value.yellow {
+            color: var(--yellow);
+        }
+
+        .stat-value.red {
+            color: var(--red);
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filter-btn {
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--bg-secondary);
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+        }
+
+        thead th:hover {
+            color: var(--text-secondary);
+        }
+
+        thead th .sort-icon {
+            display: inline-block;
+            margin-left: 4px;
+            opacity: 0.4;
+        }
+
+        thead th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(42, 42, 74, 0.5);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 12px 16px;
+            font-size: 0.88rem;
+        }
+
+        .rank-cell {
+            width: 50px;
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+
+        .game-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .game-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .game-name a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .game-name a:hover {
+            color: var(--accent);
+        }
+
+        .game-search-name {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .match-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .match-badge.high {
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .match-badge.medium {
+            background: rgba(255, 217, 61, 0.15);
+            color: var(--yellow);
+        }
+
+        .match-badge.low {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--red);
+        }
+
+        .price-cell {
+            font-weight: 700;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .price-cell.high {
+            color: var(--red);
+        }
+
+        .price-cell.medium {
+            color: var(--yellow);
+        }
+
+        .price-cell.low {
+            color: var(--green);
+        }
+
+        .price-cell.free {
+            color: var(--green);
+            font-style: italic;
+        }
+
+        .price-cell.na {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .delete-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            color: var(--red);
+            background: rgba(255, 107, 107, 0.15);
+        }
+
+        .link-cell a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.82rem;
+            transition: opacity 0.2s;
+        }
+
+        .link-cell a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+        }
+
+        .empty-state svg {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        /* Results header */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .results-count {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .export-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Spinner */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>GG.Deals Price Scraper</h1>
+            <p>Search and compare game prices from gg.deals</p>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" onclick="switchTab('trader')" id="tabBtn_trader">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                    <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z" />
+                </svg>
+                Trader Games <span class="tab-badge" id="tabBadge_trader">0</span>
+                <span class="tab-status" id="tabStatus_trader"></span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('my')" id="tabBtn_my">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                My Games <span class="tab-badge" id="tabBadge_my">0</span>
+                <span class="tab-status" id="tabStatus_my"></span>
+            </button>
+        </div>
+
+        <!-- Compare Bar -->
+        <div class="compare-bar" id="compareBar" style="display:none">
+            <button class="btn-compare-view" id="compareViewBtn" onclick="toggleCompareView()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10" />
+                    <path d="M12 20V4" />
+                    <path d="M6 20v-6" />
+                </svg>
+                Compare Results Side-by-Side
+            </button>
+        </div>
+
+        <!-- Tab Panels (trader & my) -->
+        <div class="tab-panel active" id="panel_trader"></div>
+        <div class="tab-panel" id="panel_my"></div>
+
+        <!-- Compare View -->
+        <div class="compare-view" id="compareView">
+            <div style="text-align:center;margin-bottom:20px">
+                <button class="btn btn-secondary" onclick="toggleCompareView()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    Back to Tabs
+                </button>
+            </div>
+            <div class="compare-columns">
+                <div class="compare-column">
+                    <h3 class="trader-title">Trader Games</h3>
+                    <div id="compareTable_trader"></div>
+                </div>
+                <div class="compare-column">
+                    <h3 class="my-title">My Games</h3>
+                    <div id="compareTable_my"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ---- Helpers ----
+        function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+        function getPriceClass(val, raw) { if (raw == null) return 'na'; if (val === 0) return 'free'; if (val == null) return 'na'; if (val >= 30) return 'high'; if (val >= 10) return 'medium'; return 'low'; }
+
+        const START_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+
+        // ---- Per-Tab State ----
+        const tabs = {};
+        let activeTab = 'trader';
+
+        class TabState {
+            constructor(name, label) {
+                this.name = name;
+                this.label = label;
+                this.results = [];
+                this.filtered = [];
+                this.filter = 'all';
+                this.sort = { key: 'price', dir: 'desc' };
+                this.eventSource = null;
+                this.running = false;
+            }
+        }
+
+        function initTabs() {
+            tabs.trader = new TabState('trader', 'Trader Games');
+            tabs.my = new TabState('my', 'My Games');
+            for (const key of ['trader', 'my']) {
+                document.getElementById('panel_' + key).innerHTML = buildTabHTML(key);
+            }
+        }
+
+        function buildTabHTML(tab) {
+            const lbl = tabs[tab].label;
+            return `
+        <div class="games-input-section">
+            <div class="games-input-card">
+                <div class="games-input-header">
+                    <h3>${lbl}</h3>
+                    <span class="game-count" id="gameCount_${tab}">0 games</span>
+                </div>
+                <textarea class="games-textarea" id="textarea_${tab}"
+                    placeholder="Enter game names, one per line...&#10;&#10;Example:&#10;Frostpunk&#10;DOOM II&#10;Borderlands 3"
+                    oninput="updateGameCount('${tab}')"></textarea>
+                <div class="games-input-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('fileUpload_${tab}').click()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Upload File
+                    </button>
+                    <input type="file" id="fileUpload_${tab}" accept=".txt,.csv,.text" style="display:none" onchange="handleFileUpload(event,'${tab}')">
+                    <button class="btn btn-secondary btn-sm" onclick="clearGames('${tab}')">Clear</button>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn_${tab}" onclick="startScraper('${tab}')">
+                ${START_ICON} Start Scraping
+            </button>
+            <button class="btn btn-danger" id="stopBtn_${tab}" onclick="stopScraper('${tab}')" style="display:none">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+                Stop Scraping
+            </button>
+            <button class="btn btn-secondary" id="loadBtn_${tab}" onclick="loadResults('${tab}')">Load Previous</button>
+            <button class="btn btn-secondary" id="clearBtn_${tab}" onclick="clearResults('${tab}')">Clear Results</button>
+            <div class="workers-group">
+                <span>Workers</span>
+                <input type="number" class="workers-input" id="workers_${tab}" value="3" min="1">
+            </div>
+        </div>
+        <div class="progress-section" id="progress_${tab}">
+            <div class="progress-card">
+                <div class="progress-header">
+                    <div class="progress-title"><span class="spinner"></span> <span id="progressTitle_${tab}">Scraping...</span></div>
+                    <div class="progress-stats"><span id="progressCount_${tab}">0/0</span> (<span id="progressPct_${tab}">0</span>%)</div>
+                </div>
+                <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar_${tab}"></div></div>
+                <div class="progress-game">Currently searching: <span id="progressGame_${tab}">-</span></div>
+            </div>
+        </div>
+        <div class="stats-row" id="stats_${tab}" style="display:none">
+            <div class="stat-card"><div class="stat-value accent" id="statTotal_${tab}">0</div><div class="stat-label">Total Games</div></div>
+            <div class="stat-card"><div class="stat-value green" id="statFound_${tab}">0</div><div class="stat-label">Prices Found</div></div>
+            <div class="stat-card"><div class="stat-value yellow" id="statAvg_${tab}">$0.00</div><div class="stat-label">Average</div></div>
+            <div class="stat-card"><div class="stat-value red" id="statHigh_${tab}">$0.00</div><div class="stat-label">Highest</div></div>
+        </div>
+        <div class="toolbar" id="toolbar_${tab}" style="display:none">
+            <div class="search-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="search_${tab}" placeholder="Search games..." oninput="filterAndRender('${tab}')">
+            </div>
+            <button class="filter-btn active" onclick="setFilter('${tab}','all',this)">All</button>
+            <button class="filter-btn" onclick="setFilter('${tab}','found',this)">With Price</button>
+            <button class="filter-btn" onclick="setFilter('${tab}','missing',this)">No Price</button>
+        </div>
+        <div class="results-header" id="resHeader_${tab}" style="display:none">
+            <div class="results-count" id="resCount_${tab}">0 games</div>
+            <div class="export-btns">
+                <button class="btn btn-secondary btn-sm" onclick="exportCSV('${tab}')">Export CSV</button>
+                <button class="btn btn-secondary btn-sm" onclick="copyClipboard('${tab}')">Copy</button>
+            </div>
+        </div>
+        <div class="table-container" id="tableCont_${tab}" style="display:none">
+            <div class="table-scroll">
+                <table>
+                    <thead><tr>
+                        <th class="sorted" onclick="sortBy('${tab}','rank')"># <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortBy('${tab}','name')">Game <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortBy('${tab}','price')">Best Price <span class="sort-icon">&#9650;</span></th>
+                        <th>Link</th><th></th>
+                    </tr></thead>
+                    <tbody id="tbody_${tab}"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="empty-state" id="empty_${tab}">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <h3>No results yet</h3>
+            <p>Enter games and click "Start Scraping", or "Load Previous" if you've scraped before.</p>
+        </div>`;
+        }
+
+        // ---- Tab switching ----
+        function switchTab(tab) {
+            activeTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tabBtn_' + tab).classList.add('active');
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel_' + tab).classList.add('active');
+        }
+
+        // ---- Game count & file upload ----
+        function updateGameCount(tab) {
+            const text = document.getElementById('textarea_' + tab).value;
+            const n = text.split('\n').filter(l => l.trim()).length;
+            document.getElementById('gameCount_' + tab).textContent = n + ' game' + (n !== 1 ? 's' : '');
+            document.getElementById('tabBadge_' + tab).textContent = n;
+        }
+        function handleFileUpload(event, tab) {
+            const file = event.target.files[0]; if (!file) return;
+            const r = new FileReader();
+            r.onload = e => { document.getElementById('textarea_' + tab).value = e.target.result; updateGameCount(tab); showToast('Loaded ' + file.name); };
+            r.readAsText(file); event.target.value = '';
+        }
+        function clearGames(tab) { document.getElementById('textarea_' + tab).value = ''; updateGameCount(tab); }
+
+        // ---- Scraping UI ----
+        function setScrapingUI(tab, running) {
+            const ts = tabs[tab]; ts.running = running;
+            const startBtn = document.getElementById('startBtn_' + tab);
+            const stopBtn = document.getElementById('stopBtn_' + tab);
+            const statusDot = document.getElementById('tabStatus_' + tab);
+            if (running) {
+                startBtn.disabled = true; startBtn.innerHTML = '<span class="spinner"></span> Scraping...';
+                stopBtn.style.display = ''; stopBtn.disabled = false;
+                statusDot.classList.add('active');
+            } else {
+                startBtn.disabled = false; startBtn.innerHTML = START_ICON + ' Start Scraping';
+                stopBtn.style.display = 'none';
+                statusDot.classList.remove('active');
+            }
+            updateCompareBar();
+        }
+
+        async function startScraper(tab) {
+            const gamesText = document.getElementById('textarea_' + tab).value.trim();
+            if (!gamesText) { showToast('Enter game names first'); return; }
+            const workers = parseInt(document.getElementById('workers_' + tab).value) || 3;
+            setScrapingUI(tab, true);
+            try {
+                const resp = await fetch('/api/start/' + tab, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ workers, games: gamesText })
+                });
+                if (!resp.ok) { const d = await resp.json(); showToast(d.error || 'Failed'); setScrapingUI(tab, false); return; }
+                showToast(tabs[tab].label + ' scraper started!');
+                startProgressPolling(tab);
+            } catch (e) { showToast('Error starting scraper'); setScrapingUI(tab, false); }
+        }
+
+        async function stopScraper(tab) {
+            const btn = document.getElementById('stopBtn_' + tab);
+            btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Stopping...';
+            try { await fetch('/api/stop/' + tab, { method: 'POST' }); showToast('Stop requested...'); } catch (e) { showToast('Failed to stop'); }
+        }
+
+        // ---- Progress ----
+        function startProgressPolling(tab) {
+            const section = document.getElementById('progress_' + tab);
+            section.classList.add('active');
+            const ts = tabs[tab];
+            if (ts.eventSource) ts.eventSource.close();
+            ts.eventSource = new EventSource('/api/progress-stream/' + tab);
+            let counter = 0;
+            ts.eventSource.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                updateProgress(tab, data);
+                counter++;
+                if (counter % 5 === 0 && data.status === 'running') {
+                    fetch('/api/results/' + tab).then(r => r.json()).then(r => { ts.results = r; filterAndRender(tab); }).catch(() => { });
+                }
+                if (['completed', 'error', 'stopped'].includes(data.status)) {
+                    ts.eventSource.close(); ts.eventSource = null; onComplete(tab, data.status);
+                }
+            };
+            ts.eventSource.onerror = function () { ts.eventSource.close(); ts.eventSource = null; startPollingFallback(tab); };
+        }
+
+        function startPollingFallback(tab) {
+            const ts = tabs[tab];
+            const poll = setInterval(async () => {
+                try {
+                    const resp = await fetch('/api/progress/' + tab); const data = await resp.json();
+                    updateProgress(tab, data);
+                    if (['completed', 'error', 'stopped'].includes(data.status)) { clearInterval(poll); onComplete(tab, data.status); }
+                    if (data.status === 'running') { const rr = await fetch('/api/results/' + tab); ts.results = await rr.json(); filterAndRender(tab); }
+                } catch (e) { }
+            }, 1000);
+        }
+
+        function updateProgress(tab, d) {
+            document.getElementById('progressBar_' + tab).style.width = d.percent + '%';
+            document.getElementById('progressCount_' + tab).textContent = d.current + ' / ' + d.total;
+            document.getElementById('progressPct_' + tab).textContent = d.percent;
+            document.getElementById('progressGame_' + tab).textContent = d.game || '-';
+            if (d.status === 'error') document.getElementById('progressTitle_' + tab).textContent = 'Error: ' + d.game;
+        }
+
+        async function onComplete(tab, status) {
+            setScrapingUI(tab, false);
+            const msgs = { completed: 'Scraping complete!', stopped: 'Scraping stopped', error: 'Scraping failed' };
+            document.getElementById('progressTitle_' + tab).textContent = msgs[status] || 'Done';
+            setTimeout(() => document.getElementById('progress_' + tab).classList.remove('active'), 3000);
+            if (status === 'completed' || status === 'stopped') { showToast(tabs[tab].label + ': ' + msgs[status]); await loadResults(tab); }
+            updateCompareBar();
+        }
+
+        // ---- Results ----
+        async function loadResults(tab) {
+            try {
+                const resp = await fetch('/api/results/' + tab); if (!resp.ok) throw 0;
+                tabs[tab].results = await resp.json();
+                if (tabs[tab].results.length === 0) { showToast('No results found'); return; }
+                showToast('Loaded ' + tabs[tab].results.length + ' games');
+                showResultsUI(tab); filterAndRender(tab); updateCompareBar();
+            } catch (e) { showToast('Failed to load results'); }
+        }
+
+        async function clearResults(tab) {
+            try {
+                await fetch('/api/clear-results/' + tab, { method: 'POST' });
+                tabs[tab].results = []; tabs[tab].filtered = [];
+                document.getElementById('empty_' + tab).style.display = '';
+                ['stats_', 'toolbar_', 'resHeader_', 'tableCont_'].forEach(p => document.getElementById(p + tab).style.display = 'none');
+                showToast('Results cleared'); updateCompareBar();
+            } catch (e) { showToast('Failed to clear'); }
+        }
+
+        function showResultsUI(tab) {
+            document.getElementById('empty_' + tab).style.display = 'none';
+            ['stats_', 'toolbar_', 'resHeader_', 'tableCont_'].forEach(p => document.getElementById(p + tab).style.display = '');
+        }
+
+        function filterAndRender(tab) {
+            const ts = tabs[tab]; if (ts.results.length === 0) return;
+            showResultsUI(tab);
+            const q = (document.getElementById('search_' + tab).value || '').toLowerCase();
+            ts.filtered = ts.results.filter(r => {
+                const ms = !q || r.search_name.toLowerCase().includes(q) || (r.matched_name && r.matched_name.toLowerCase().includes(q));
+                if (ts.filter === 'found') return ms && r.price != null;
+                if (ts.filter === 'missing') return ms && r.price == null;
+                return ms;
+            });
+            ts.filtered.sort((a, b) => {
+                let va, vb;
+                if (ts.sort.key === 'name') { va = (a.matched_name || a.search_name).toLowerCase(); vb = (b.matched_name || b.search_name).toLowerCase(); return ts.sort.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va); }
+                va = a.price_value ?? -1; vb = b.price_value ?? -1;
+                return ts.sort.dir === 'asc' ? va - vb : vb - va;
+            });
+            updateStats(tab); renderTable(tab);
+        }
+
+        function updateStats(tab) {
+            const r = tabs[tab].results;
+            const total = r.length, found = r.filter(x => x.price != null).length;
+            const prices = r.filter(x => x.price_value != null && x.price_value > 0).map(x => x.price_value);
+            const avg = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0;
+            const high = prices.length > 0 ? Math.max(...prices) : 0;
+            document.getElementById('statTotal_' + tab).textContent = total;
+            document.getElementById('statFound_' + tab).textContent = found;
+            document.getElementById('statAvg_' + tab).textContent = '$' + avg.toFixed(2);
+            document.getElementById('statHigh_' + tab).textContent = '$' + high.toFixed(2);
+        }
+
+        function renderTable(tab) {
+            const ts = tabs[tab]; const tbody = document.getElementById('tbody_' + tab);
+            document.getElementById('resCount_' + tab).textContent = 'Showing ' + ts.filtered.length + ' game' + (ts.filtered.length !== 1 ? 's' : '');
+            if (ts.filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">No games match</td></tr>'; return; }
+            tbody.innerHTML = ts.filtered.map((r, i) => buildRow(r, i, tab)).join('');
+        }
+
+        function buildRow(r, i, tab) {
+            const dn = r.matched_name || r.search_name, pc = getPriceClass(r.price_value, r.price), dp = r.price || 'N/A';
+            const ssn = r.matched_name && r.matched_name.toLowerCase() !== r.search_name.toLowerCase();
+            const c = r.match_confidence; let mb = '';
+            if (c != null && c > 0) { if (c >= 0.8) mb = `<span class="match-badge high">${Math.round(c * 100)}%</span>`; else if (c >= 0.6) mb = `<span class="match-badge medium">${Math.round(c * 100)}%</span>`; else mb = `<span class="match-badge low">${Math.round(c * 100)}%</span>`; }
+            return `<tr>
+            <td class="rank-cell">${i + 1}</td>
+            <td><div class="game-cell"><div class="game-name">${r.url ? `<a href="${r.url}" target="_blank">${escHtml(dn)}</a>` : escHtml(dn)}${mb}</div>${ssn ? `<div class="game-search-name">Searched: ${escHtml(r.search_name)}</div>` : ''}</div></td>
+            <td class="price-cell ${pc}">${escHtml(dp)}</td>
+            <td class="link-cell">${r.url ? `<a href="${r.url}" target="_blank">gg.deals &rarr;</a>` : '<span style="color:var(--text-muted)">-</span>'}</td>
+            <td class="delete-cell"><button class="btn-delete" onclick="deleteResult('${tab}',${i})">&#128465;</button></td>
+        </tr>`;
+        }
+
+        async function deleteResult(tab, idx) {
+            const item = tabs[tab].filtered[idx]; if (!item) return;
+            try {
+                const resp = await fetch('/api/delete-result/' + tab, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ search_name: item.search_name }) });
+                if (!resp.ok) throw 0;
+                tabs[tab].results = tabs[tab].results.filter(r => r.search_name !== item.search_name);
+                if (tabs[tab].results.length === 0) { document.getElementById('empty_' + tab).style.display = '';['stats_', 'toolbar_', 'resHeader_', 'tableCont_'].forEach(p => document.getElementById(p + tab).style.display = 'none'); }
+                else filterAndRender(tab);
+                showToast('Removed: ' + item.search_name); updateCompareBar();
+            } catch (e) { showToast('Failed to delete'); }
+        }
+
+        // ---- Sort & Filter ----
+        function sortBy(tab, key) {
+            const ts = tabs[tab];
+            if (ts.sort.key === key) ts.sort.dir = ts.sort.dir === 'desc' ? 'asc' : 'desc';
+            else { ts.sort.key = key; ts.sort.dir = key === 'name' ? 'asc' : 'desc'; }
+            filterAndRender(tab);
+        }
+        function setFilter(tab, f, btn) {
+            tabs[tab].filter = f;
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterAndRender(tab);
+        }
+
+        // ---- Export ----
+        function exportCSV(tab) {
+            const r = tabs[tab].filtered; if (r.length === 0) return;
+            let csv = 'Rank,Game,Search Name,Price,Confidence,URL\n';
+            r.forEach((x, i) => { const n = (x.matched_name || x.search_name).replace(/"/g, '""'); const s = x.search_name.replace(/"/g, '""'); csv += `${i + 1},"${n}","${s}","${x.price || 'N/A'}","${x.match_confidence != null ? Math.round(x.match_confidence * 100) + '%' : ''}","${x.url || ''}"\n`; });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = tab + '_prices.csv'; a.click(); showToast('CSV downloaded');
+        }
+        function copyClipboard(tab) {
+            const r = tabs[tab].filtered; if (r.length === 0) return;
+            const t = r.map(x => `${x.matched_name || x.search_name} - ${x.price || 'N/A'}`).join('\n');
+            navigator.clipboard.writeText(t).then(() => showToast('Copied!')).catch(() => showToast('Failed'));
+        }
+
+        // ---- Compare View ----
+        const compareState = { trader: { sortDir: 'desc', search: '' }, my: { sortDir: 'desc', search: '' } };
+
+        function updateCompareBar() {
+            const hasTrader = tabs.trader.results.length > 0;
+            const hasMy = tabs.my.results.length > 0;
+            const bar = document.getElementById('compareBar');
+            bar.style.display = (hasTrader && hasMy) ? '' : 'none';
+        }
+
+        function toggleCompareView() {
+            const cv = document.getElementById('compareView');
+            const isActive = cv.classList.contains('active');
+            if (isActive) {
+                cv.classList.remove('active');
+                document.querySelectorAll('.tab-panel, .tabs-bar, .compare-bar').forEach(el => el.style.display = '');
+                document.getElementById('panel_' + activeTab).classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-panel, .tabs-bar').forEach(el => el.style.display = 'none');
+                cv.classList.add('active');
+                renderCompareTable('trader');
+                renderCompareTable('my');
+            }
+        }
+
+        function compareSearch(tab) {
+            compareState[tab].search = (document.getElementById('cmpSearch_' + tab) || {}).value || '';
+            renderCompareTable(tab);
+        }
+
+        function compareSortPrice(tab) {
+            compareState[tab].sortDir = compareState[tab].sortDir === 'desc' ? 'asc' : 'desc';
+            renderCompareTable(tab);
+        }
+
+        function renderCompareTable(tab) {
+            const raw = tabs[tab].results;
+            const container = document.getElementById('compareTable_' + tab);
+            if (raw.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px">No results</p>'; return; }
+
+            const st = compareState[tab];
+            const q = st.search.toLowerCase();
+
+            // Filter by search
+            let r = raw;
+            if (q) {
+                r = raw.filter(x => {
+                    const dn = (x.matched_name || x.search_name).toLowerCase();
+                    return dn.includes(q) || x.search_name.toLowerCase().includes(q);
+                });
+            }
+
+            // Sort by price
+            r = [...r].sort((a, b) => {
+                const va = a.price_value ?? -1, vb = b.price_value ?? -1;
+                return st.sortDir === 'asc' ? va - vb : vb - va;
+            });
+
+            const arrow = st.sortDir === 'asc' ? '&#9650;' : '&#9660;';
+            const searchVal = escHtml(st.search);
+
+            let html = `<div class="search-box" style="margin-bottom:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cmpSearch_${tab}" placeholder="Search..." value="${searchVal}" oninput="compareSearch('${tab}')" style="width:100%;padding:10px 16px 10px 40px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:0.9rem;outline:none"></div>`;
+            html += '<div class="table-container"><div class="table-scroll"><table><thead><tr>';
+            html += '<th>#</th><th>Game</th>';
+            html += `<th onclick="compareSortPrice('${tab}')" style="cursor:pointer">Price <span style="color:var(--accent)">${arrow}</span></th>`;
+            html += '</tr></thead><tbody>';
+
+            if (r.length === 0) {
+                html += '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted)">No games match</td></tr>';
+            } else {
+                r.forEach((x, i) => {
+                    const dn = x.matched_name || x.search_name, pc = getPriceClass(x.price_value, x.price);
+                    html += `<tr><td class="rank-cell">${i + 1}</td><td class="game-name">${x.url ? `<a href="${x.url}" target="_blank">${escHtml(dn)}</a>` : escHtml(dn)}</td><td class="price-cell ${pc}">${escHtml(x.price || 'N/A')}</td></tr>`;
+                });
+            }
+            html += '</tbody></table></div></div>';
+
+            const prices = r.filter(x => x.price_value != null && x.price_value > 0).map(x => x.price_value);
+            const total = prices.reduce((a, b) => a + b, 0);
+            const showing = q ? `${r.length} of ${raw.length}` : `${r.length}`;
+            html += `<div style="text-align:right;margin-top:8px;font-size:0.85rem;color:var(--text-secondary)">${showing} games &middot; Total: <strong style="color:var(--yellow)">$${total.toFixed(2)}</strong></div>`;
+            container.innerHTML = html;
+        }
+
+        // ---- Init ----
+        initTabs();
+    </script>
+</body>
+
+</html>
