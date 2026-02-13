@@ -4,7 +4,7 @@ A web-based price lookup tool built for **Steam game traders**. Quickly check cu
 
 Whether you're buying, selling, or swapping Steam keys, this tool lets you paste a list of game names and instantly see the best available prices across all stores tracked by gg.deals.
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue) ![Flask](https://img.shields.io/badge/Flask-3.1-green) ![Selenium](https://img.shields.io/badge/Selenium-4.40-orange)
+![Python](https://img.shields.io/badge/Python-3.10+-blue) ![Flask](https://img.shields.io/badge/Flask-3.1-green) ![Selenium](https://img.shields.io/badge/Selenium-4.40-orange)
 
 ## Features
 
@@ -26,7 +26,7 @@ Whether you're buying, selling, or swapping Steam keys, this tool lets you paste
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.10+
 - Google Chrome browser installed
 
 ## Setup
