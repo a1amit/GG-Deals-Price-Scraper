@@ -24,53 +24,51 @@ Whether you're buying, selling, or swapping Steam keys, this tool lets you paste
 - **Pricing your inventory** — bulk-check current prices for all your tradeable Steam keys
 - **Finding deals** — identify undervalued games in a trade offer by sorting by price
 
-## Quick Start (Windows — no Python needed)
+## Getting Started
+
+> **Prerequisite:** Google Chrome must be installed.
+
+### Option 1: Download the .exe (Windows — no Python needed)
 
 1. Download **`GG Deals Scraper.exe`** from the [Releases](../../releases) page
 2. Double-click the `.exe` — a console window opens and your browser launches automatically
 3. Start scraping!
 
-> **Prerequisite:** Google Chrome must be installed.
+### Option 2: Run from source
 
-## Running from Source
+1. Make sure you have **Python 3.10+** and **Google Chrome** installed
+2. Set up the project:
+   ```bash
+   # Create virtual environment
+   python -m venv venv
 
-### Requirements
+   # Activate it
+   # Windows:
+   venv\Scripts\activate
+   # Linux/macOS:
+   source venv/bin/activate
 
-- Python 3.10+
-- Google Chrome browser installed
+   # Install dependencies
+   pip install -r requirements.txt
+   ```
+3. Run the app:
+   ```bash
+   python app.py
+   ```
+4. Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser
 
-### Setup
+### Option 3: Build the .exe yourself
 
-```bash
-# Create virtual environment
-python -m venv venv
+1. Follow the setup steps from Option 2
+2. Build:
+   ```bash
+   pip install pyinstaller
+   pyinstaller --clean GG_Deals_Scraper.spec
+   ```
+   Or on Windows, just double-click `build.bat`.
+3. The executable will be at `dist/GG Deals Scraper.exe`
 
-# Activate it
-# Windows:
-venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Usage
-
-```bash
-python app.py
-```
-
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
-
-### Building the .exe yourself
-
-```bash
-pip install pyinstaller
-pyinstaller --clean GG_Deals_Scraper.spec
-```
-
-The executable will be at `dist/GG Deals Scraper.exe`. On Windows you can also just double-click `build.bat`.
+## How to Use
 
 1. **Add games** — type game names (one per line) or upload a `.txt` file in either tab:
    ```
