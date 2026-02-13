@@ -5,9 +5,10 @@ __pycache__/
 venv/
 .env
 
-# IDE
+# IDE / Tools
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 
@@ -20,6 +21,10 @@ NUL
 
 # User data
 games.txt
+
+# PyInstaller
+build/
+dist/
 
 # OS
 Thumbs.db

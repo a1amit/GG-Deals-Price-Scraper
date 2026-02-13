@@ -24,12 +24,22 @@ Whether you're buying, selling, or swapping Steam keys, this tool lets you paste
 - **Pricing your inventory** — bulk-check current prices for all your tradeable Steam keys
 - **Finding deals** — identify undervalued games in a trade offer by sorting by price
 
-## Requirements
+## Quick Start (Windows — no Python needed)
+
+1. Download **`GG Deals Scraper.exe`** from the [Releases](../../releases) page
+2. Double-click the `.exe` — a console window opens and your browser launches automatically
+3. Start scraping!
+
+> **Prerequisite:** Google Chrome must be installed.
+
+## Running from Source
+
+### Requirements
 
 - Python 3.10+
 - Google Chrome browser installed
 
-## Setup
+### Setup
 
 ```bash
 # Create virtual environment
@@ -45,13 +55,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Usage
+### Usage
 
 ```bash
 python app.py
 ```
 
 Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
+
+### Building the .exe yourself
+
+```bash
+pip install pyinstaller
+pyinstaller --clean GG_Deals_Scraper.spec
+```
+
+The executable will be at `dist/GG Deals Scraper.exe`. On Windows you can also just double-click `build.bat`.
 
 1. **Add games** — type game names (one per line) or upload a `.txt` file in either tab:
    ```
@@ -71,14 +90,16 @@ Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
 ## Project Structure
 
 ```
-├── app.py              # Flask web server & per-tab API endpoints
-├── scraper.py          # Multi-threaded scraping logic (per-instance state)
+├── app.py                  # Flask web server & per-tab API endpoints
+├── scraper.py              # Multi-threaded scraping logic (per-instance state)
 ├── templates/
-│   └── index.html      # Frontend UI (dual-tab single-page app)
-├── games.txt           # Default game list
-├── requirements.txt    # Python dependencies
-├── *_results.json      # Scraped results per tab (generated at runtime)
-└── *_progress.json     # Scraping progress per tab (generated at runtime)
+│   └── index.html          # Frontend UI (dual-tab single-page app)
+├── games.txt               # Default game list
+├── requirements.txt        # Python dependencies
+├── GG_Deals_Scraper.spec   # PyInstaller build config
+├── build.bat               # One-click build script (Windows)
+├── *_results.json          # Scraped results per tab (generated at runtime)
+└── *_progress.json         # Scraping progress per tab (generated at runtime)
 ```
 
 ## Tech Stack

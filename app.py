@@ -1,14 +1,35 @@
 import json
 import os
+import sys
 import threading
+import webbrowser
 import atexit
 from flask import Flask, render_template, jsonify, Response, request
 import time
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-GAMES_FILE = os.path.join(BASE_DIR, "games.txt")
 
-app = Flask(__name__)
+def _get_base_dirs():
+    """Return (bundle_dir, data_dir).
+
+    bundle_dir – where bundled resources live (templates/, etc.).
+    data_dir   – writable directory for runtime files (results, progress).
+    When running from source both are the same.  In a PyInstaller frozen
+    build bundle_dir is the temp extraction folder and data_dir is the
+    directory that contains the .exe.
+    """
+    if getattr(sys, "frozen", False):
+        bundle_dir = sys._MEIPASS
+        data_dir = os.path.dirname(sys.executable)
+    else:
+        bundle_dir = os.path.dirname(os.path.abspath(__file__))
+        data_dir = bundle_dir
+    return bundle_dir, data_dir
+
+
+BUNDLE_DIR, DATA_DIR = _get_base_dirs()
+GAMES_FILE = os.path.join(DATA_DIR, "games.txt")
+
+app = Flask(__name__, template_folder=os.path.join(BUNDLE_DIR, "templates"))
 
 # ---- Per-tab scraper state ----
 TABS = {}
@@ -17,8 +38,8 @@ for _tab_name in ("trader", "my"):
         "thread": None,
         "running": False,
         "stop_event": threading.Event(),
-        "results_file": os.path.join(BASE_DIR, f"{_tab_name}_results.json"),
-        "progress_file": os.path.join(BASE_DIR, f"{_tab_name}_progress.json"),
+        "results_file": os.path.join(DATA_DIR, f"{_tab_name}_results.json"),
+        "progress_file": os.path.join(DATA_DIR, f"{_tab_name}_progress.json"),
     }
 
 VALID_TABS = set(TABS.keys())
@@ -222,4 +243,10 @@ atexit.register(cleanup)
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, threaded=True)
+    is_frozen = getattr(sys, "frozen", False)
+
+    if is_frozen:
+        # Auto-open the browser for end-users
+        threading.Timer(1.5, lambda: webbrowser.open("http://127.0.0.1:5000")).start()
+
+    app.run(debug=not is_frozen, port=5000, threaded=True)

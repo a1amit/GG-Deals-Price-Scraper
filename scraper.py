@@ -14,7 +14,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def _data_dir():
+    """Writable directory: next to .exe when frozen, else script dir."""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+BASE_DIR = _data_dir()
 GAMES_FILE = os.path.join(BASE_DIR, "games.txt")
 RESULTS_FILE = os.path.join(BASE_DIR, "results.json")
 PROGRESS_FILE = os.path.join(BASE_DIR, "progress.json")
