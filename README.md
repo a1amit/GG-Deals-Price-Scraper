@@ -70,6 +70,8 @@ Whether you're buying, selling, or swapping Steam keys, this tool lets you paste
 
 ## Screenshot
 
+*Side-by-side comparison view after scraping both tabs and clicking "Compare Results Side-by-Side":*
+
 ![Comparison view](assets/comparison_example.png)
 
 ## How to Use
