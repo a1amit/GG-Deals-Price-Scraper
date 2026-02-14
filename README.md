@@ -68,6 +68,10 @@ Whether you're buying, selling, or swapping Steam keys, this tool lets you paste
    Or on Windows, just double-click `build.bat`.
 3. The executable will be at `dist/GG Deals Scraper.exe`
 
+## Screenshot
+
+![Comparison view](assets/comparison_example.png)
+
 ## How to Use
 
 1. **Add games** — type game names (one per line) or upload a `.txt` file in either tab:
