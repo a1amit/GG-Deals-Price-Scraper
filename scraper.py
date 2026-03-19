@@ -165,7 +165,7 @@ def _extract_item_info(item):
             pass
 
     try:
-        price_el = item.find_element(By.CSS_SELECTOR, ".price-inner")
+        price_el = item.find_element(By.CSS_SELECTOR, "span.price")
         price = price_el.text.strip()
     except NoSuchElementException:
         pass
@@ -231,7 +231,7 @@ def scrape_game(driver, game_name):
                     best_score = score
                     best_name = name
                     best_url = link.get_attribute("href")
-            prices = driver.find_elements(By.CSS_SELECTOR, ".price-inner")
+            prices = driver.find_elements(By.CSS_SELECTOR, "span.price")
             if prices and best_name:
                 best_price = prices[0].text.strip()
 
