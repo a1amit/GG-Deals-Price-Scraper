@@ -246,7 +246,27 @@ if __name__ == "__main__":
     is_frozen = getattr(sys, "frozen", False)
 
     if is_frozen:
-        # Auto-open the browser for end-users
-        threading.Timer(1.5, lambda: webbrowser.open("http://127.0.0.1:5000")).start()
+        # Suppress Flask/Werkzeug dev-server banner — misleading in a bundled desktop app.
+        # Flask prints via flask.cli.show_server_banner; Werkzeug prints the WARNING,
+        # "Running on", and "Press CTRL+C" lines through its 'werkzeug' logger.
+        import logging
+        import flask.cli
+        flask.cli.show_server_banner = lambda *a, **kw: None
+
+        class _BannerFilter(logging.Filter):
+            _drop = ("This is a development server", "Running on", "Press CTRL+C")
+            def filter(self, record):
+                msg = record.getMessage()
+                return not any(s in msg for s in self._drop)
+
+        logging.getLogger("werkzeug").addFilter(_BannerFilter())
+
+        print("Starting server...", flush=True)
+
+        def _on_ready():
+            print("Server started on http://127.0.0.1:5000", flush=True)
+            webbrowser.open("http://127.0.0.1:5000")
+
+        threading.Timer(1.5, _on_ready).start()
 
     app.run(debug=not is_frozen, port=5000, threaded=True)

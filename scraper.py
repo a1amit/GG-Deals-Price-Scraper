@@ -113,12 +113,37 @@ def save_results(results, output_file=None):
             json.dump(results, f, indent=2, ensure_ascii=False)
 
 
+def _get_chrome_major_version():
+    """Detect installed Chrome major version on Windows so uc can fetch a
+    matching chromedriver. Returns int or None if detection fails."""
+    try:
+        import winreg
+        for hive, path in (
+            (winreg.HKEY_CURRENT_USER, r"Software\Google\Chrome\BLBeacon"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Google\Chrome\BLBeacon"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Wow6432Node\Google\Chrome\BLBeacon"),
+        ):
+            try:
+                with winreg.OpenKey(hive, path) as key:
+                    version, _ = winreg.QueryValueEx(key, "version")
+                    return int(version.split(".")[0])
+            except OSError:
+                continue
+    except Exception:
+        pass
+    return None
+
+
 def create_driver(headless=False):
     options = uc.ChromeOptions()
     options.add_argument("--window-size=1920,1080")
     if headless:
         options.add_argument("--headless=new")
-    driver = uc.Chrome(options=options, headless=headless)
+    kwargs = {"options": options, "headless": headless}
+    major = _get_chrome_major_version()
+    if major:
+        kwargs["version_main"] = major
+    driver = uc.Chrome(**kwargs)
     return driver
 
 
